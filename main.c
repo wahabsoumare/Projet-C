@@ -4,6 +4,9 @@
 
 int main(){
     
-    isconnected();
+    Student student;
+
+    inputStudent(&student);
+    saveStudent(student, student.classe.name);
 return 0;
 }

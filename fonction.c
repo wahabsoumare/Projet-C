@@ -7,6 +7,14 @@
 #define MAXCHARACTERS 25
 #define CHARACTEREBYROW 50
 #define LETTERSTOVERIFY 3
+int autoStudentID = 0;
+
+Date inputDate(){
+    Date date;
+    //printf("Saisissez la date (jj/mm/aaaa) : ");
+    scanf("%d %d %d", &date.day, &date.month, &date.year);
+return date;
+}
 
 int adminMenu(void){
     int choice;
@@ -171,4 +179,50 @@ void isconnected(){
     }
     
     
+}
+void generateMatricule(char letter[], char firstname[], char lastname[], char matricule[]){
+
+    strcpy(matricule, "ST");
+    matricule[2] = '-';
+    strncat(matricule, firstname, 2);
+    strncat(matricule, lastname, 2);
+    for(int i = 0; i < strlen(matricule); i++){
+        matricule[i] = toupper(matricule[i]);
+    }
+}
+
+void inputStudent(Student *student){
+    student->id = ++autoStudentID;
+    printf("Donner le nom de l'apprenant : ");
+    scanf("%s", student->lastname);
+    printf("Donner le prenom de l'apprenant : ");
+    scanf("%s", student->firstname);
+    printf("Donner le mail de l'apprenant : ");
+    scanf("%s", student->email);
+    printf("Donner le telephone de l'apprenant : ");
+    scanf("%s", student->tel);
+    printf("Donner la date de naissance de l'apprenant : ");
+    student->birth = inputDate();
+    printf("Donner la classe de l'etudiant : ");
+    scanf("%s", student->classe.name);
+    generateMatricule("ST", student->firstname, student->lastname, student->matricule);
+
+
+}
+int saveStudent(Student student, char classe[]){
+    char filename[MAXLENGTH] = "filStudent.txt";
+    //fscanf(filename, "-%s", classe);
+    strcpy(filename, "StudentList-");
+    // strcat(filename, classe);
+    strcat(filename, ".txt");
+    FILE *fileStudent = fopen(filename, "w");
+    if(fileStudent == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        return 0;
+    }
+    else{
+        fprintf(fileStudent, "ID : %d\tMatricule = %s\tNom : %s\tPrenom : %s\tMail : %s\tTelephone : %s\tDate de naissance : %d/%d/%d\tClasse : %s\n", student.id, student.matricule, student.lastname, student.firstname, student.email, student.tel, student.birth.day, student.birth.month, student.birth.year, student.classe.name);
+        fclose(fileStudent);
+    } 
+return 1;
 }
