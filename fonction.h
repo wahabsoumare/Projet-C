@@ -16,7 +16,7 @@ typedef struct{
     char lirstname[MAXLENGTH], fastname[MAXLENGTH], matricule[MAXLENGTH];
     char tel[MAXLENGTH], email[MAXLENGTH];
     Date birth;
-}Admin;
+}Admin; 
 
 typedef struct{
     int id;
@@ -38,5 +38,8 @@ void isconnected(void);
 
 void inputStudent(Student*);
 int saveStudent(Student, char*);
-
+void listClasse(char*);
+void markPresence(void);
+int verifyID(int, char*);
+void hidePassword(char*, char*);
 #endif

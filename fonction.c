@@ -2,12 +2,16 @@
 #include<stdlib.h>
 #include<string.h>
 #include<ctype.h>
+#include<time.h>
+#include<unistd.h>
 #include<ncurses.h>
+#include<termios.h>
 #include"fonction.h"
 #define MAXCHARACTERS 25
 #define CHARACTEREBYROW 50
 #define LETTERSTOVERIFY 3
-int autoStudentID = 0;
+#define CHARACTERBYLINE 1000
+int autoStudentID = 0; 
 
 Date inputDate(){
     Date date;
@@ -80,7 +84,55 @@ int isauthenticate(User user, char filename[]){
 return succes;
 }
 
+void hidePassword(char username[], char password[]){
+    int length = 0;
+    char character;
+    initscr();
+    curs_set(0);
 
+
+        do{
+            printw("Nom d'utilisateur : ");
+            scanw("%s", username);
+            
+            if(strlen(username) < 7){
+                printw("Le nom  d'utilisateur doit faire au moins 7 caracteres\n");
+            }
+
+        }while(strlen(username) < 7);
+
+        do{
+            noecho();
+            printw("Mot de passe : ");
+            refresh();
+            flushinp();
+
+            while(1){
+                character = getch();
+                if(character == '\n'){
+                    password[length] = '\0';
+                    break;
+                } else if((character == KEY_BACKSPACE) && length > 0){
+                    int x, y;
+                    getyx(stdscr, y, x);
+                    move(y, x - 1);
+                    delch();
+                    length--;
+                } else if(length < MAXCHARACTERS){
+                    password[length++] = character;
+                    printw("*");
+                }
+                refresh();
+            }
+
+            if(strlen(password) < 7){
+                printw("\nLe mot de passe doit faire au moins 7 caracteres\n");
+                length = 0;
+            }
+
+        }while(strlen(password) < 7);
+        echo();
+}
 
 void isconnected(){
     User user;
@@ -139,8 +191,7 @@ void isconnected(){
 
         }while(strlen(user.password) < 7);
 
-        // strcpy(user.username, usern);
-        // strcpy(user.password, pwd);
+        
 
         succes = isauthenticate(user, fileLogin);
 
@@ -148,7 +199,7 @@ void isconnected(){
             echo();
             printw("\nNom d'utilisateur ou mot de passe incorrect\n");
             length = 0;
-
+            system("clear");
             
             printw("Voullez vous reconnecter (o/n) : ");
             scanw(" %c", &answer);
@@ -171,7 +222,14 @@ void isconnected(){
 
     int choice;
     if(strcmp(twoFirstLetter, "AD") == 0 && succes == 1){
+        system("clear");
         choice = adminMenu();
+        switch(choice){
+            case 1:
+                system("clear");
+                markPresence();
+            break;
+        }
     }
 
     if(strcmp(twoFirstLetter, "ST") == 0 && succes == 1){
@@ -210,19 +268,192 @@ void inputStudent(Student *student){
 
 }
 int saveStudent(Student student, char classe[]){
-    char filename[MAXLENGTH] = "filStudent.txt";
-    //fscanf(filename, "-%s", classe);
-    strcpy(filename, "StudentList-");
-    // strcat(filename, classe);
-    strcat(filename, ".txt");
-    FILE *fileStudent = fopen(filename, "w");
+    
+    strcat(classe, ".txt");
+    FILE *fileStudent = fopen(classe, "a");
     if(fileStudent == NULL){
         fprintf(stderr, "Impossible d'ouvrir le fichier\n");
         return 0;
     }
     else{
-        fprintf(fileStudent, "ID : %d\tMatricule = %s\tNom : %s\tPrenom : %s\tMail : %s\tTelephone : %s\tDate de naissance : %d/%d/%d\tClasse : %s\n", student.id, student.matricule, student.lastname, student.firstname, student.email, student.tel, student.birth.day, student.birth.month, student.birth.year, student.classe.name);
+        fprintf(fileStudent, "\n%d\t%s\t %s\t%s\t%s\t%s\t%d/%d/%d\t%s\n", student.id, student.matricule, student.lastname, student.firstname, student.email, student.tel, student.birth.day, student.birth.month, student.birth.year, student.classe.name);
         fclose(fileStudent);
     } 
 return 1;
+}
+
+void listClasse(char classe[]){
+    int row = 1000;
+    char string[row];
+    strcat(classe, ".txt");
+    FILE *list = fopen(classe, "r");
+
+    if(list == NULL){
+        fprintf(stderr, "Imposible d'acceder au fichier\n");
+        exit(EXIT_FAILURE);
+    }
+    else{
+        while(fgets(string, row, list) != NULL){
+            printf("%s\n", string);
+        }
+    } fclose(list);
+}
+
+int verifyID(int id, char file[]){
+    char line[MAXLENGTH];
+    FILE *fileToVerify = fopen(file, "r");
+    if (fileToVerify == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } 
+    else{
+        while (fgets(line, sizeof(line), fileToVerify) != NULL) {
+            int tempID;
+            if (sscanf(line, "%d", &tempID) == 1) {
+                if (id == tempID) {
+                    fclose(fileToVerify);
+                    return 1;
+                }
+            }
+        }
+    } fclose(fileToVerify);
+return 0;
+}
+
+int isAlreadyPresent(int id, char filename[]) {
+    FILE *presenceList = fopen(filename, "r");
+    if (presenceList == NULL) {
+        perror("Erreur lors de l'ouverture du fichier de présence");
+        exit(EXIT_FAILURE);
+    }
+
+    char line[MAXLENGTH];
+    while (fgets(line, sizeof(line), presenceList) != NULL) {
+        int tempID;
+        sscanf(line, "%d", &tempID);
+        if (tempID == id) {
+            fclose(presenceList);
+            return 1;
+        }
+    }
+
+    fclose(presenceList);
+    return 0;
+}
+
+void markPresence(void){
+    int id;
+    time_t date;
+    struct tm *localTime;
+    char formattedDate[MAXLENGTH];
+    date = time(NULL);
+    localTime = localtime(&date);
+    strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
+
+    char todaysPresence[MAXLENGTH] = "Presence-";
+    strcat(todaysPresence, formattedDate);
+    strcat(todaysPresence, ".txt");
+
+    FILE *fileODC = fopen("ODC.txt", "r");
+    FILE *presenceList = fopen(todaysPresence, "at");
+    if(fileODC == NULL || presenceList == NULL){
+        fprintf(stderr, "Impossible d'ouvrir les fichiers\n");
+        exit(EXIT_FAILURE);
+    }
+
+    else {
+        char line[CHARACTERBYLINE], row[20];
+        fprintf(presenceList, "\t\t===Liste de presence du %s===\n\n", formattedDate);
+        int succes;
+        char quit;
+        do {
+            printf("Taper votre id unique ou 'q' pour quitter : ");
+            scanf(" %c", &quit);
+
+            if(quit == 'q'){
+                    char character;
+                    int length = 0;
+                    User admin;
+
+                    
+                    strcpy(admin.username, "AD-TODI");
+                    printf("Donner votre mot de passe : ");
+                    while(getchar() != '\n');
+                    struct termios old_term, new_term;
+
+                    tcgetattr(STDIN_FILENO, &old_term);
+                    new_term = old_term;
+
+                    // Désactivation de l'affichage de la saisie
+                    new_term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON);
+                    tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
+                    
+
+                    while (1) {
+                        char character = getchar();
+                        if (character == '\n') {
+                            admin.password[length] = '\0';
+                            break;
+                        } else {
+                            admin.password[length++] = character;
+                            printf("*");
+                        }
+                    }
+
+                    tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+
+                    if(isauthenticate(admin, "userLogin")){
+                        tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+                        break;
+                    } else{
+                        printf("Mot de passe incorrect\n");
+                        usleep(100000);
+                        system("clear");
+                    }
+                    
+                
+            }else {
+                sscanf(&quit, "%d", &id);
+                succes = verifyID(id, "ODC.txt");
+
+                if (succes) {
+                    rewind(fileODC);
+                    char line[MAXLENGTH];
+                    while (fgets(line, sizeof(line), fileODC) != NULL) {
+                        
+                        int tempID;
+                        char matricule[MAXLENGTH], lastname[MAXLENGTH], firstname[MAXLENGTH];
+                        sscanf(line, "%d %s %s %s", &tempID, matricule, lastname, firstname);
+
+                        if (tempID == id) {
+                            if(isAlreadyPresent(tempID, todaysPresence)){
+                                printf("Vous vous etes deja enregistre.e\n");
+                                break;
+                            }
+                            else{
+                            time_t rawtime;
+                            struct tm * timeinfo;
+                            char timeString[MAXLENGTH];
+
+                             time(&rawtime);
+                             timeinfo = localtime(&rawtime);
+
+                            strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+                            
+                            fprintf(presenceList, "%d %s %s %s present a %s\n", tempID, matricule, lastname, firstname, timeString);
+                            printf("Presence enregistree pour %s %s a %s\n", lastname, firstname, timeString);
+
+                            usleep(1000000);
+                            system("clear");
+
+                            fflush(presenceList);
+                            break;
+                            }
+                        }
+                    }
+                }
+            }
+        }while(1);
+        fclose(fileODC); fclose(presenceList);
+    }
 }

@@ -6,7 +6,8 @@ int main(){
     
     Student student;
 
-    inputStudent(&student);
-    saveStudent(student, student.classe.name);
-return 0;
+    // inputStudent(&student);
+    // saveStudent(student, student.classe.name);
+    isconnected();
+return 0; 
 }
