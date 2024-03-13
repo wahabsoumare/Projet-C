@@ -3,7 +3,7 @@
 #define MAXLENGTH 30
 #define MESSAGECONTENT 5000
 //int autoClasseID = 0;
-
+// enum classename{Dev_web, Dev_data, Ref_dig};
 typedef struct{
     int day, month, year;
 }Date;
@@ -48,6 +48,7 @@ int adminMenu(void);
 int isauthenticate(User, char*);
 void isconnected(void);
 
+int verifyClasse(Classe);
 void inputStudent(Student*);
 int saveStudent(Student, char*);
 void listClasse(char*);
@@ -59,12 +60,16 @@ void homeMenu();
 void manageAdmin();
 void manageStudent(int);
 int getStudentID(char*, char*);
+Classe getStudentClasse(int, char*);
+Student getStudentMatricule(int id, char*);
 void writeToFile(FILE*, FILE*);
 void generateAllPresenceList(char*);
 Message writeMessage(void);
 Message writeMessageToAll(void);
-int sendMessage(Message, char*);
+Message writeMessageToClasse(void);
+int sendMessageByStudent(Message, char*);
 int sendMessageToAll(Message, char*);
+int sendMessageByClasse(Message, char*);
 void readMessage(char fileMessage[]);
 int countMessageNumber(char*);
 #endif

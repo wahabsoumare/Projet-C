@@ -12,7 +12,7 @@
 #define CHARACTEREBYROW 50
 #define LETTERSTOVERIFY 3
 #define CHARACTERBYLINE 1000
-int msgCount;
+int msgCount = 0;
 int autoStudentID = 0; 
 
 Date inputDate(char msg[]){
@@ -86,10 +86,6 @@ void manageAdmin(){
         break;
 
         case 2:
-            printf("Toto tape pathe\n");
-        break;
-
-        case 3:
             system("clear");
             generateAllPresenceList("Presence");
             printf("L'ensemble des presences on ete enregistre dans Liste_de_tous_les_presence.txt\n");
@@ -98,23 +94,64 @@ void manageAdmin(){
             goto home;
         break;
 
-        case 4:
+        case 3:
+            system("clear");
             Message message;
-            message = writeMessage();
-            int succefuly = sendMessage(message, "ADMIN");
-            if(succefuly){
-                printf("Message envoyer avec succes\n");
-                usleep(500000);
-                system("clear");
-                goto home;
-            } else{
-                printf("Message non envoye\n");
-                usleep(500000);
-                goto home;
+            do{
+                printf("1.Envoyer un message a tout le monde\n2.Envoyer un message a une classe\n3.Envoyer un message a un eleve\n");
+                printf("Votre choix : ");
+                scanf("%d", &choice);
+                while(getchar() != '\n');
+                if(choice < 1 || choice > 3){
+                    printf("Choix indisponible\n");
+                }
+            }while(choice < 1 || choice > 3);
+            if(choice == 1){
+                message = writeMessageToAll();
+                int succefuly = sendMessageToAll(message, "ADMIN");
+                if(succefuly){
+                    printf("Message envoyer avec succes\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                } else{
+                    printf("Message non envoyer\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                }
+            } else if(choice == 2){
+                message = writeMessageToClasse();
+                int succefuly = sendMessageByClasse(message, "ADMIN");
+                if(succefuly){
+                    printf("Message envoyer avec succes\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                } else{
+                    printf("Message non envoyer\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                }
+            } else if(choice == 3){
+                message = writeMessage();
+                int succefuly = sendMessageByStudent(message, "ADMIN");
+                if(succefuly){
+                    printf("Message envoyer avec succes\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                } else{
+                    printf("Message non envoyer\n");
+                    usleep(400000);
+                    system("clear");
+                    goto home;
+                }
             }
         break;
 
-        case 5:
+        case 4:
             printf("Toto tape pathe\n");
         break;
     }
@@ -128,7 +165,8 @@ int studentMenu(void){
     msgCount = 0;
 
     do{
-        msgCount = countMessageNumber("messageToAll.txt") / 5;
+        msgCount = countMessageNumber("messageToAll.txt") / 9;
+        // msgCount += countMessageNumber()
         printf("===Menu===\n");
         printf("1.Marquer ma presence\n2.Nombre de minutes d'absence\n3.Mes messages(%d)\n4.Deconnexion\n", msgCount);
         printf("Votre choix : ");
@@ -148,6 +186,12 @@ return choice;
 
 void manageStudent(int id){
     home:
+    Classe classe;
+    Student student;
+    classe = getStudentClasse(id, "userLogin.txt");
+    student = getStudentMatricule(id, "userLogin.txt");
+    strcat(classe.name, ".txt");
+    strcat(student.matricule, ".txt");
     int choice = studentMenu();
     switch(choice){
         case 1:
@@ -163,6 +207,8 @@ void manageStudent(int id){
         case 3:
         system("clear");
             readMessage("messageToAll.txt");
+            readMessage(classe.name);
+            readMessage(student.matricule);
             int quit;
             do{
                 printf("\nTaper 1 pour quitter : ");
@@ -186,29 +232,7 @@ void manageStudent(int id){
     }
 }
 
-int isauthenticate(User user, char filename[]){
-    FILE *fileLogin = fopen(filename, "r");
-    User tempuser;
-    char goodUsername[MAXCHARACTERS], goodPassword[MAXCHARACTERS];
-    int succes = 0;
-    if(fileLogin == NULL){
-        fprintf(stderr, "Impossible d'acceder au ficher de connexion\n");
-        exit(EXIT_FAILURE);
-    } else{
-        while(!feof(fileLogin)){
-            fscanf(fileLogin,"%s %s %d", tempuser.username, tempuser.password, &tempuser.id);
-            strcpy(goodUsername, tempuser.username);
-            strcpy(goodPassword, tempuser.password);
-            
-            if(strcmp(user.username, goodUsername) == 0 && strcmp(user.password, goodPassword) == 0){
-                succes = 1;
-                break;
-            }
-        }
-    } fclose(fileLogin);
 
-return succes;
-}
 
 void hidePassword(char username[], char password[]){
     int length = 0;
@@ -271,7 +295,7 @@ int getStudentID(char username[], char filename[]) {
         exit(EXIT_FAILURE);
     } else {
         while (fgets(line, CHARACTERBYLINE, fileToRead) != NULL) {
-            sscanf(line, "%s  %*s %d", tempUsername, &tempID);
+            sscanf(line, "%s  %*s  %d", tempUsername, &tempID);
             if (strcmp(username, tempUsername) == 0) {
                 fclose(fileToRead);
                 return tempID;
@@ -282,105 +306,166 @@ int getStudentID(char username[], char filename[]) {
 return 0;
 }
 
+Classe getStudentClasse(int id, char filename[]){
+    FILE *fileToRead = fopen(filename, "r");
+    char line[CHARACTERBYLINE];
+    int tempID;
+    char tempUsername[MAXLENGTH];
+    Classe classe;
 
-
-void isconnected(){
-    User user;
-    char usern[MAXCHARACTERS], pwd[MAXCHARACTERS];
-    char character;
-    char twoFirstLetter[LETTERSTOVERIFY]; 
-    char fileLogin[] = "userLogin.txt";
-    int length = 0;
-    char answer;
-    int succes;
-
-    initscr();
-    curs_set(0);
-
-    do{
-        printw("===Veuillez vous authentifier===\n");
-
-        do{
-            printw("Nom d'utilisateur : ");
-            scanw("%s", user.username);
-            
-            if(strlen(user.username) < 7){
-                printw("Le nom  d'utilisateur doit faire au moins 7 caracteres\n");
+    if (fileToRead == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while (fgets(line, CHARACTERBYLINE, fileToRead) != NULL) {
+            sscanf(line, "%s  %*s %d %s", tempUsername, &tempID, classe.name);
+            if (id == tempID) {
+                fclose(fileToRead);
+                return classe;
             }
+        }
+    }
+    fclose(fileToRead);
+exit(EXIT_FAILURE);
+}
 
-        }while(strlen(user.username) < 7);
+Student getStudentMatricule(int id, char filename[]){
+    FILE *fileToRead = fopen(filename, "r");
+    char line[CHARACTERBYLINE];
+    int tempID;
+    char tempUsername[MAXLENGTH];
+    Student student;
 
-        do{
-        noecho();
-        printw("Mot de passe : ");
-        refresh();
-        flushinp();
+    if (fileToRead == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while (fgets(line, CHARACTERBYLINE, fileToRead) != NULL) {
+            sscanf(line, "%s  %*s %d", student.matricule, &tempID);
+            if (id == tempID) {
+                fclose(fileToRead);
+                return student;
+            }
+        }
+    }
+    fclose(fileToRead);
+exit(EXIT_FAILURE);
+}
 
-        while(1){
-            character = getch();
-            if(character == '\n'){
-                user.password[length] = '\0';
+
+int verifyClasse(Classe classe){
+    Classe tabClasse[3];
+    
+    strcpy(tabClasse[0].name, "Dev-web");
+    strcpy(tabClasse[1].name, "Dev-data");
+    strcpy(tabClasse[2].name, "Ref-dig");
+    
+    for(int i = 0; i < 3; i++){
+        if(strcmp(classe.name, tabClasse[i].name) == 0){
+            return 1;
+        }
+    }
+return 0;
+}
+
+
+int isauthenticate(User user, char filename[]) {
+    FILE *fileLogin = fopen(filename, "r");
+    User tempuser;
+    int succes = 0;
+    if (fileLogin == NULL) {
+        fprintf(stderr, "Impossible d'acceder au fichier de connexion\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while (fscanf(fileLogin, "%s %s %d", tempuser.username, tempuser.password, &tempuser.id) == 3) {
+            if (strcmp(user.username, tempuser.username) == 0 && strcmp(user.password, tempuser.password) == 0) {
+                succes = 1;
                 break;
-            } else if((character == KEY_BACKSPACE) && length > 0){
-                int x, y;
-                getyx(stdscr, y, x);
-                move(y, x - 1);
-                delch();
-                length--;
-            } else if(length < MAXCHARACTERS){
-                user.password[length++] = character;
-                printw("*");
             }
-            refresh();
         }
+        fclose(fileLogin);
+    }
+    return succes;
+}
 
-        if(strlen(user.password) < 7){
-            printw("\nLe mot de passe doit faire au moins 7 caracteres\n");
+void isconnected() {
+    User user;
+    char answer = 'o'; // Initialiser answer à 'o' pour que la boucle s'exécute au moins une fois
+    int succes, length = 0;
+    char twoFirstLetter[LETTERSTOVERIFY];
+    char fileLogin[] = "userLog.txt";
+    system("clear");
+    do {
+        printf("===Veuillez vous authentifier===\n");
+
+        do {
+            printf("Nom d'utilisateur : ");
+            scanf("%s", user.username);
+            if (strlen(user.username) < 7) {
+                printf("Le nom d'utilisateur doit faire au moins 7 caracteres\n");
+            }
+        } while (strlen(user.username) < 7);
+
+        do {
+            printf("Donner votre mot de passe : ");
+            while(getchar() != '\n'); // Nettoyer le buffer d'entrée
+            struct termios old_term, new_term;
+            tcgetattr(STDIN_FILENO, &old_term);
+            new_term = old_term;
+            new_term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON);
+            tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
             length = 0;
-        }
-
-        }while(strlen(user.password) < 7);
-
-        
+            while (1) {
+                char character = getchar();
+                if (character == '\n') {
+                    user.password[length] = '\0';
+                    break;
+                } else {
+                    user.password[length++] = character;
+                    printf("*");
+                }
+            }
+            tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+            printf("\n");
+            if (strlen(user.password) < 7) {
+                printf("Le mot de passe doit faire au moins 7 caracteres\n");
+                length = 0;
+            }
+        } while (strlen(user.password) < 7);
 
         succes = isauthenticate(user, fileLogin);
 
-        if(!succes){
-            echo();
-            printw("\nNom d'utilisateur ou mot de passe incorrect\n");
-            length = 0;
+        if (!succes) {
             system("clear");
-            
-            printw("Voullez vous reconnecter (o/n) : ");
-            scanw(" %c", &answer);
+            printf("Nom d'utilisateur ou mot de passe incorrect\n");
+            printf("Voulez-vous reconnecter (o/n) : ");
+            scanf(" %c", &answer);
             answer = tolower(answer);
-
-            if(answer != 'n'){
-                printw("\nBye!\n");
-                refresh();
-                endwin();
+            if (answer == 'n') {
+                printf("Bye!\n");
                 exit(EXIT_SUCCESS);
             }
-        } 
+        } else{
+            system("clear");
+            break;
+        }
 
-        
-    }while(!succes || answer == 'o');
+    } while (answer != 'n'); // La boucle continue tant que l'utilisateur ne choisit pas de ne pas se reconnecter
 
-    refresh();
-    endwin();
     strncpy(twoFirstLetter, user.username, 2);
 
-    if(strcmp(twoFirstLetter, "AD") == 0 && succes == 1){
-        system("clear");
+    if (strcmp(twoFirstLetter, "AD") == 0 && succes == 1) {
         manageAdmin();
+        // printf("Connecté en tant qu'administrateur.\n");
     }
 
-    if(strcmp(twoFirstLetter, "ST") == 0 && succes == 1){
+    if (strcmp(twoFirstLetter, "ST") == 0 && succes == 1) {
         int id = getStudentID(user.username, fileLogin);
-        system("clear");
         manageStudent(id);
+        // printf("Connecté en tant qu'étudiant.\n");
     }
 }
+
 void generateMatricule(char letter[], char firstname[], char lastname[], char matricule[]){
     strcpy(matricule, "ST");
     matricule[2] = '-';
@@ -479,7 +564,7 @@ int isAlreadyPresent(int id, char filename[]) {
         }
     }
 
-    fclose(presenceList);
+    fclose(presenceList);     
     return 0;
 }
 
@@ -718,14 +803,33 @@ return message;
 
 Message writeMessageToAll(void){
     Message message;
-    // getchar();
     printf("Ecriver vcotre message : ");
     fgets(message.content, sizeof(message.content), stdin);
     message.content[strcspn(message.content, "\n")] = '\0';
 return message;
 }
 
-int sendMessage(Message message, char sender[]){
+Message writeMessageToClasse(void){
+    Message message;
+    Classe classe;
+    
+    do{
+        printf("Donner le nom de la classe : ");
+        scanf("%s", classe.name);
+        if(!verifyClasse(classe)){
+            printf("Classe indisponible\n");
+        }
+    }while(!verifyClasse(classe));
+    strcpy(message.receiver, classe.name);
+
+    getchar();
+    printf("Ecriver votre message : ");
+    fgets(message.content, sizeof(message.content), stdin);
+    message.content[strcspn(message.content, "\n")] = '\0';
+return message;
+}
+
+int sendMessageByStudent(Message message, char sender[]){
     char receiver[MAXLENGTH];
     strcpy(receiver, message.receiver);
     strcat(receiver, ".txt");
@@ -750,9 +854,12 @@ int sendMessage(Message message, char sender[]){
         fprintf(stderr, "Impossible d'ouvrir le fichier\n");
         exit(EXIT_FAILURE);
     } else{
+        fprintf(fileReceiver, "\n");
         fprintf(fileReceiver, "Message de : %s\n\nDate : le %s a %s\n\nContenue : %s", message.sender, formattedDate, timeString, message.content);
+        fprintf(fileReceiver, "\n\n");
+        fclose(fileReceiver);
         return 1;
-    } fclose(fileReceiver);
+    } 
 return 0;
 }
 
@@ -778,9 +885,45 @@ int sendMessageToAll(Message message, char sender[]){
         fprintf(stderr, "Impossible d'ouvrir le fichier\n");
         exit(EXIT_FAILURE);
     } else{
+        fprintf(fileReceiver, "\n");
         fprintf(fileReceiver, "Message de : %s\n\nDate : le %s a %s\n\nContenue : %s", message.sender, formattedDate, timeString, message.content);
+        fprintf(fileReceiver, "\n\n");
+        fclose(fileReceiver);
         return 1;
-    } fclose(fileReceiver);
+    } 
+return 0;
+}
+
+int sendMessageByClasse(Message message, char sender[]){
+    strcpy(message.sender, sender);
+
+    time_t date;
+    struct tm *localTime;
+    char formattedDate[MAXLENGTH];
+    date = time(NULL);
+    localTime = localtime(&date);
+    strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
+
+    time_t rawtime;
+    struct tm * timeinfo;
+    char timeString[MAXLENGTH];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+
+    strcat(message.receiver, ".txt");
+    FILE *fileReceiver = fopen(message.receiver, "w");
+
+    if(fileReceiver == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        fprintf(fileReceiver, "\n");
+        fprintf(fileReceiver, "Message de : %s\n\nDate : le %s a %s\n\nContenue : %s", message.sender, formattedDate, timeString, message.content);
+        fprintf(fileReceiver, "\n\n");
+        fclose(fileReceiver);
+        return 1;
+    } 
 return 0;
 }
 

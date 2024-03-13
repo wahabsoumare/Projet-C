@@ -1,3 +1,37 @@
+		===Liste de presence du 10-03-2024===
+
+
+20	 ST-DIAK	 Kane	 Diakha	 present le 10-03-2024	 a 17:51:15
+
+1	 ST-TODI	 Diop	 Toto	 present le 10-03-2024	 a 17:51:25
+
+4	 ST-RAFA	 Fall	 Rama	 present le 10-03-2024	 a 17:51:32
+
+6	 ST-ABTA	 Tall	 Abdou	 present le 10-03-2024	 a 18:15:47
+
+7	 ST-TOSI	 Simon	 Tonton	 present le 10-03-2024	 a 18:15:49
+
+5	 ST-ANND	 Ndiaye	 Ansu	 present le 10-03-2024	 a 18:15:59
+
+13	 ST-NDMA	 Mane	 Ndiame	 present le 10-03-2024	 a 19:07:59
+
+21	 ST-SEGU	 Gueye	 Serig	 present le 10-03-2024	 a 19:08:02
+
+23	 ST-MAMO	 Mbow	 Mamoud	 present le 10-03-2024	 a 19:08:06
+
+18	 ST-NGOU	 Toure	 Ngoun	 present le 10-03-2024	 a 19:08:14
+
+19	 ST-GUMA	 Mane	 Gourou	 present le 10-03-2024	 a 19:08:22
+
+27	 ST-SOUY	 Souane	 Soul	 present le 10-03-2024	 a 19:08:26
+		===Liste de presence du 14-03-2024===
+
+
+3	 ST-SIFA	 Fall	 Sidi	 present le 14-03-2024	 a 11:41:41
+		===Liste de presence du 13-03-2024===
+
+
+3	 ST-SIFA	 Fall	 Sidi	 present le 13-03-2024	 a 11:26:08
 		===Liste de presence du 09-03-2024===
 
 
@@ -34,40 +68,10 @@
 23	 ST-MAMO	 Mbow	 Mamoud	 present le 09-03-2024	 a 16:23:58
 
 25	 ST-NDAW	 Ndoye	 Ndong	 present le 09-03-2024	 a 16:24:04
-		===Liste de presence du 13-03-2024===
 
+1	 ST-TODI	 Diop	 Toto	 present le 14-03-2024	 a 15:41:59
 
-3	 ST-SIFA	 Fall	 Sidi	 present le 13-03-2024	 a 11:26:08
-		===Liste de presence du 14-03-2024===
-
-
-3	 ST-SIFA	 Fall	 Sidi	 present le 14-03-2024	 a 11:41:41
-		===Liste de presence du 10-03-2024===
-
-
-20	 ST-DIAK	 Kane	 Diakha	 present le 10-03-2024	 a 17:51:15
-
-1	 ST-TODI	 Diop	 Toto	 present le 10-03-2024	 a 17:51:25
-
-4	 ST-RAFA	 Fall	 Rama	 present le 10-03-2024	 a 17:51:32
-
-6	 ST-ABTA	 Tall	 Abdou	 present le 10-03-2024	 a 18:15:47
-
-7	 ST-TOSI	 Simon	 Tonton	 present le 10-03-2024	 a 18:15:49
-
-5	 ST-ANND	 Ndiaye	 Ansu	 present le 10-03-2024	 a 18:15:59
-
-13	 ST-NDMA	 Mane	 Ndiame	 present le 10-03-2024	 a 19:07:59
-
-21	 ST-SEGU	 Gueye	 Serig	 present le 10-03-2024	 a 19:08:02
-
-23	 ST-MAMO	 Mbow	 Mamoud	 present le 10-03-2024	 a 19:08:06
-
-18	 ST-NGOU	 Toure	 Ngoun	 present le 10-03-2024	 a 19:08:14
-
-19	 ST-GUMA	 Mane	 Gourou	 present le 10-03-2024	 a 19:08:22
-
-27	 ST-SOUY	 Souane	 Soul	 present le 10-03-2024	 a 19:08:26
+3	 ST-SIFA	 Fall	 Sidi	 present le 14-03-2024	 a 16:26:31
 		===Liste de presence du 12-03-2024===
 
 
@@ -96,3 +100,7 @@
 9	 ST-MBND	 Ndiaye	 Mbou	 present le 12-03-2024	 a 12:16:54
 
 11	 ST-NGBE	 Beye	 Ngoné	 present le 12-03-2024	 a 12:17:00
+		===Liste de presence du 12-03-2024===
+
+
+24	 ST-BALA	 Fall	 Balaba	 present le 12-03-2024	 a 12:01:27

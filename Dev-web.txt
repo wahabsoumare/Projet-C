@@ -1,3 +1,7 @@
-ID	MATRICULE NOM	PRENOM	    MAIL	            TELEPHONE DATE DE NAISSANCE   CLASSE
 
-1	ST-TODI	 Diop	Toto	totodiop@gmail.com	771234567	2/3/2000	Dev-web
+Message de : ADMIN
+
+Date : le 13-03-2024 a 04:31:57
+
+Contenue : Salut les dev web
+

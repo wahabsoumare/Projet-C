@@ -26,3 +26,7 @@
 9	 ST-MBND	 Ndiaye	 Mbou	 present le 12-03-2024	 a 12:16:54
 
 11	 ST-NGBE	 Beye	 Ngoné	 present le 12-03-2024	 a 12:17:00
+		===Liste de presence du 12-03-2024===
+
+
+24	 ST-BALA	 Fall	 Balaba	 present le 12-03-2024	 a 12:01:27

@@ -7,57 +7,56 @@ AD-ADMINIS    passerAD123   14
 
 
 
+ST-TODI	 passerST123    1   Dev-web
 
-ST-TODI	 passerST123    1
+ST-PADI	 passerST123    2   Dev-web
 
-ST-PADI	 passerST123    2
+ST-SIFA	 passerST123	3   Dev-web
 
-ST-SIFA	 passerST123	3
+ST-RAFA	 passerST123	4   Dev-web
 
-ST-RAFA	 passerST123	4
+ST-ANND	 passerST123	5   Dev-web
 
-ST-ANND	 passerST123	5
+ST-ABTA	 passerST123    6   Dev-web
 
-ST-ABTA	 passerST123    6
+ST-TOSI	 passerST123    7   Dev-web
 
-ST-TOSI	 passerST123    7
+ST-NIND    passerST123    8 Dev-web
 
-ST-NIND    passerST123    8
+ST-MBND    passerST123    9 Dev-web
 
-ST-MBND    passerST123    9
+ST-SYKH    passerST123    10    Dev-web
 
-ST-SYKH    passerST123    10
+ST-NGBE    passerST123    11    Ref-dig
 
-ST-NGBE    passerST123    11
+ST-MBMA    passerST123    12    Ref-dig
 
-ST-MBMA    passerST123    12
+ST-NDMA    passerST123    13    Ref-dig
 
-ST-NDMA    passerST123    13
+ST-KAHA    passerST123    14    Ref-dig
 
-ST-KAHA    passerST123    14
+ST-SADI    passerST123    15    Ref-dig
 
-ST-SADI    passerST123    15
+ST-DIKH    passerST123    16    Ref-dig
 
-ST-DIKH    passerST123    16
+ST-BETI    passerST123    17    Ref-dig
 
-ST-BETI    passerST123    17
+ST-NGOU    passerST123    18    Ref-dig
 
-ST-NGOU    passerST123    18
+ST-GUMA    passerST123    19    Ref-dig
 
-ST-GUMA    passerST123    19
+ST-DIAK    passerST123    20    Ref-dig
 
-ST-DIAK    passerST123    20
+ST-SEGU    passerST123    21    Dev-data
 
-ST-SEGU    passerST123    21
+ST-DAKE    passerST123    22    Dev-data
 
-ST-DAKE    passerST123    22
+ST-MAMO    passerST123    23    Dev-data
 
-ST-MAMO    passerST123    23
+ST-BALA    passerST123    24    Dev-data
 
-ST-BALA    passerST123    24
+ST-NDAW    passerST123    25    Dev-data
 
-ST-NDAW    passerST123    25
+ST-DIMA    passerST123    26    Dev-data
 
-ST-DIMA    passerST123    26
-
-ST-SOUY    passerST123    27
+ST-SOUY    passerST123    27    Dev-data
