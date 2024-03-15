@@ -1,0 +1,26 @@
+		===Liste de presence du 10-03-2024===
+
+
+20	 ST-DIAK	 Kane	 Diakha	 present le 10-03-2024	 a 17:51:15
+
+1	 ST-TODI	 Diop	 Toto	 present le 10-03-2024	 a 17:51:25
+
+4	 ST-RAFA	 Fall	 Rama	 present le 10-03-2024	 a 17:51:32
+
+6	 ST-ABTA	 Tall	 Abdou	 present le 10-03-2024	 a 18:15:47
+
+7	 ST-TOSI	 Simon	 Tonton	 present le 10-03-2024	 a 18:15:49
+
+5	 ST-ANND	 Ndiaye	 Ansu	 present le 10-03-2024	 a 18:15:59
+
+13	 ST-NDMA	 Mane	 Ndiame	 present le 10-03-2024	 a 19:07:59
+
+21	 ST-SEGU	 Gueye	 Serig	 present le 10-03-2024	 a 19:08:02
+
+23	 ST-MAMO	 Mbow	 Mamoud	 present le 10-03-2024	 a 19:08:06
+
+18	 ST-NGOU	 Toure	 Ngoun	 present le 10-03-2024	 a 19:08:14
+
+19	 ST-GUMA	 Mane	 Gourou	 present le 10-03-2024	 a 19:08:22
+
+27	 ST-SOUY	 Souane	 Soul	 present le 10-03-2024	 a 19:08:26

@@ -1,0 +1,36 @@
+		===Liste de presence du 09-03-2024===
+
+
+3	 ST-SIFA	 Fall	 Sidi	 present le 09-03-2024	 a 16:21:02
+
+20	 ST-DIAK	 Kane	 Diakha	 present le 09-03-2024	 a 16:21:10
+
+21	 ST-SEGU	 Gueye	 Serig	 present le 09-03-2024	 a 16:21:14
+
+12	 ST-MBMA	 Mane	 Mbathi	 present le 09-03-2024	 a 16:21:18
+
+15	 ST-SADI	 Diop	 Sadio	 present le 09-03-2024	 a 16:21:22
+
+11	 ST-NGBE	 Beye	 Ngoné	 present le 09-03-2024	 a 16:21:45
+
+27	 ST-SOUY	 Souane	 Soul	 present le 09-03-2024	 a 16:22:15
+
+1	 ST-TODI	 Diop	 Toto	 present le 09-03-2024	 a 16:22:17
+
+5	 ST-ANND	 Ndiaye	 Ansu	 present le 09-03-2024	 a 16:22:21
+
+16	 ST-DIKH	 Khane	 Djibr	 present le 09-03-2024	 a 16:22:43
+
+13	 ST-NDMA	 Mane	 Ndiame	 present le 09-03-2024	 a 16:23:30
+
+7	 ST-TOSI	 Simon	 Tonton	 present le 09-03-2024	 a 16:23:35
+
+8	 ST-NIND	 Ndiaye	 Niok	 present le 09-03-2024	 a 16:23:37
+
+9	 ST-MBND	 Ndiaye	 Mbou	 present le 09-03-2024	 a 16:23:47
+
+26	 ST-DIMA	 Mane	 Dimah	 present le 09-03-2024	 a 16:23:56
+
+23	 ST-MAMO	 Mbow	 Mamoud	 present le 09-03-2024	 a 16:23:58
+
+25	 ST-NDAW	 Ndoye	 Ndong	 present le 09-03-2024	 a 16:24:04

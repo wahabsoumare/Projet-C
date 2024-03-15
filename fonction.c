@@ -6,18 +6,55 @@
 #include<unistd.h>
 #include<ncurses.h>
 #include<termios.h>
+#include<dirent.h>
 #include"fonction.h"
 #define MAXCHARACTERS 25
 #define CHARACTEREBYROW 50
 #define LETTERSTOVERIFY 3
 #define CHARACTERBYLINE 1000
+int msgCount;
 int autoStudentID = 0; 
 
-Date inputDate(){
+Date inputDate(char msg[]){
     Date date;
-    //printf("Saisissez la date (jj/mm/aaaa) : ");
+    printf("%s sous format (jj/mm/aaaa) : ", msg);
     scanf("%d %d %d", &date.day, &date.month, &date.year);
 return date;
+}
+
+int isLeapyear(Date date){
+    return ((date.year % 4 == 0 && date.year % 100 != 0) || (date.year % 400 == 0));
+}
+
+int isvalidDayinMonth(Date date){
+    switch (date.month){
+        case 4: case 6: case 9: case 11:
+            return (date.day > 30) ? 0 : 1;
+            
+        break;
+
+        case 2:
+            if(!(isLeapyear(date))){
+                return (date.day > 28) ? 0 : 1;
+            } else{
+                return (date.day > 29) ? 0 : 1;
+            }
+        break;
+
+        default:
+            return (date.day > 31) ? 0 : 1;
+        break;
+    }
+}
+int isvalideDate(Date date){
+    if(date.month < 1 || date.month > 12){
+        return 0;
+    }
+    if(!isvalidDayinMonth(date)){
+        return 0;
+    }
+
+return 1;
 }
 
 int adminMenu(void){
@@ -25,30 +62,80 @@ int adminMenu(void){
 
     do{
         printf("===Menu===\n");
-        printf("1.Marquer presence\n2.Listes presence\3.Deconnexion\n");
+        printf("1.Marquer presence\n2.Generer des fichiers\n3.Envoyer des messages\n4.Deconnexion\n");
         printf("Votre choix : ");
         scanf("%d", &choice);
         while(getchar() != '\n');
 
         if(choice < 1 || choice > 3){
             printf("Choix indisponible\n");
+            system("clear");
         }
 
-    }while(choice < 1 || choice > 3);
+    }while(choice < 1 || choice > 4);
 
 return choice;
 }
 
+void manageAdmin(){
+    home:
+    int choice = adminMenu();
+    switch(choice){
+        case 1:
+            markPresence();
+        break;
+
+        case 2:
+            printf("Toto tape pathe\n");
+        break;
+
+        case 3:
+            system("clear");
+            generateAllPresenceList("Presence");
+            printf("L'ensemble des presences on ete enregistre dans Liste_de_tous_les_presence.txt\n");
+            usleep(600000);
+            system("clear");
+            goto home;
+        break;
+
+        case 4:
+            Message message;
+            message = writeMessage();
+            int succefuly = sendMessage(message, "ADMIN");
+            if(succefuly){
+                printf("Message envoyer avec succes\n");
+                usleep(500000);
+                system("clear");
+                goto home;
+            } else{
+                printf("Message non envoye\n");
+                usleep(500000);
+                goto home;
+            }
+        break;
+
+        case 5:
+            printf("Toto tape pathe\n");
+        break;
+    }
+}
+
+
+
 
 int studentMenu(void){
     int choice;
+    msgCount = 0;
 
     do{
+        msgCount = countMessageNumber("messageToAll.txt") / 5;
         printf("===Menu===\n");
-        printf("1.Marquer ma presence\n2.Nombre de minutes d'absence\n3.Mes messages\n4.Deconnexion\n");
-        scanf("%d", &choice);
+        printf("1.Marquer ma presence\n2.Nombre de minutes d'absence\n3.Mes messages(%d)\n4.Deconnexion\n", msgCount);
         printf("Votre choix : ");
+        // while(getchar() != '\n');
+        scanf("%d", &choice);
         while(getchar() != '\n');
+        
 
         if(choice < 1 || choice > 4){
             printf("Choix indisponible\n");
@@ -59,9 +146,48 @@ int studentMenu(void){
 return choice;
 }
 
+void manageStudent(int id){
+    home:
+    int choice = studentMenu();
+    switch(choice){
+        case 1:
+            markPresenceforStudent(id);
+            system("clear");
+            goto home;
+        break;
+
+        case 2:
+            printf("Toto tape pathe\n");
+        break;
+
+        case 3:
+        system("clear");
+            readMessage("messageToAll.txt");
+            int quit;
+            do{
+                printf("\nTaper 1 pour quitter : ");
+                scanf("%d", &quit);
+                if(quit != 1){
+                    printf("Commende indisponible\n");
+                }
+            }while(quit != 1);
+
+            if(quit == 1){
+                system("clear");
+                msgCount = 0;
+                goto home;
+            }
+            
+        break;
+
+        case 4:
+            printf("Toto tape pathe\n");
+        break;
+    }
+}
 
 int isauthenticate(User user, char filename[]){
-    FILE *fileLogin = fopen(filename, "rb");
+    FILE *fileLogin = fopen(filename, "r");
     User tempuser;
     char goodUsername[MAXCHARACTERS], goodPassword[MAXCHARACTERS];
     int succes = 0;
@@ -69,11 +195,11 @@ int isauthenticate(User user, char filename[]){
         fprintf(stderr, "Impossible d'acceder au ficher de connexion\n");
         exit(EXIT_FAILURE);
     } else{
-        while(fread(&tempuser, sizeof(User), 1, fileLogin) == 1){
-            
+        while(!feof(fileLogin)){
+            fscanf(fileLogin,"%s %s %d", tempuser.username, tempuser.password, &tempuser.id);
             strcpy(goodUsername, tempuser.username);
             strcpy(goodPassword, tempuser.password);
-
+            
             if(strcmp(user.username, goodUsername) == 0 && strcmp(user.password, goodPassword) == 0){
                 succes = 1;
                 break;
@@ -134,12 +260,36 @@ void hidePassword(char username[], char password[]){
         echo();
 }
 
+int getStudentID(char username[], char filename[]) {
+    FILE *fileToRead = fopen(filename, "r");
+    char line[CHARACTERBYLINE];
+    int tempID;
+    char tempUsername[MAXLENGTH];
+
+    if (fileToRead == NULL) {
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else {
+        while (fgets(line, CHARACTERBYLINE, fileToRead) != NULL) {
+            sscanf(line, "%s  %*s %d", tempUsername, &tempID);
+            if (strcmp(username, tempUsername) == 0) {
+                fclose(fileToRead);
+                return tempID;
+            }
+        }
+    }
+    fclose(fileToRead);
+return 0;
+}
+
+
+
 void isconnected(){
     User user;
     char usern[MAXCHARACTERS], pwd[MAXCHARACTERS];
     char character;
     char twoFirstLetter[LETTERSTOVERIFY]; 
-    char fileLogin[] = "userLogin";
+    char fileLogin[] = "userLogin.txt";
     int length = 0;
     char answer;
     int succes;
@@ -205,7 +355,7 @@ void isconnected(){
             scanw(" %c", &answer);
             answer = tolower(answer);
 
-            if(answer != 'o'){
+            if(answer != 'n'){
                 printw("\nBye!\n");
                 refresh();
                 endwin();
@@ -220,26 +370,18 @@ void isconnected(){
     endwin();
     strncpy(twoFirstLetter, user.username, 2);
 
-    int choice;
     if(strcmp(twoFirstLetter, "AD") == 0 && succes == 1){
         system("clear");
-        choice = adminMenu();
-        switch(choice){
-            case 1:
-                system("clear");
-                markPresence();
-            break;
-        }
+        manageAdmin();
     }
 
     if(strcmp(twoFirstLetter, "ST") == 0 && succes == 1){
-        choice = studentMenu();
+        int id = getStudentID(user.username, fileLogin);
+        system("clear");
+        manageStudent(id);
     }
-    
-    
 }
 void generateMatricule(char letter[], char firstname[], char lastname[], char matricule[]){
-
     strcpy(matricule, "ST");
     matricule[2] = '-';
     strncat(matricule, firstname, 2);
@@ -260,7 +402,7 @@ void inputStudent(Student *student){
     printf("Donner le telephone de l'apprenant : ");
     scanf("%s", student->tel);
     printf("Donner la date de naissance de l'apprenant : ");
-    student->birth = inputDate();
+    student->birth = inputDate("Donner la date ");
     printf("Donner la classe de l'etudiant : ");
     scanf("%s", student->classe.name);
     generateMatricule("ST", student->firstname, student->lastname, student->matricule);
@@ -350,12 +492,12 @@ void markPresence(void){
     localTime = localtime(&date);
     strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
 
-    char todaysPresence[MAXLENGTH] = "Presence-";
+    char todaysPresence[MAXLENGTH] = "Presence";
     strcat(todaysPresence, formattedDate);
     strcat(todaysPresence, ".txt");
 
     FILE *fileODC = fopen("ODC.txt", "r");
-    FILE *presenceList = fopen(todaysPresence, "at");
+    FILE *presenceList = fopen(todaysPresence, "a");
     if(fileODC == NULL || presenceList == NULL){
         fprintf(stderr, "Impossible d'ouvrir les fichiers\n");
         exit(EXIT_FAILURE);
@@ -365,89 +507,76 @@ void markPresence(void){
         char line[CHARACTERBYLINE], row[20];
         fprintf(presenceList, "\t\t===Liste de presence du %s===\n\n", formattedDate);
         int succes;
-        char quit;
+        char quit[20];
         do {
             printf("Taper votre id unique ou 'q' pour quitter : ");
-            scanf(" %c", &quit);
+            scanf(" %s", quit);
 
-            if(quit == 'q'){
-                    char character;
-                    int length = 0;
-                    User admin;
-
-                    
-                    strcpy(admin.username, "AD-TODI");
-                    printf("Donner votre mot de passe : ");
-                    while(getchar() != '\n');
-                    struct termios old_term, new_term;
-
-                    tcgetattr(STDIN_FILENO, &old_term);
-                    new_term = old_term;
-
-                    // Désactivation de l'affichage de la saisie
-                    new_term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON);
-                    tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
-                    
-
-                    while (1) {
-                        char character = getchar();
-                        if (character == '\n') {
-                            admin.password[length] = '\0';
-                            break;
-                        } else {
-                            admin.password[length++] = character;
-                            printf("*");
-                        }
-                    }
-
-                    tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
-
-                    if(isauthenticate(admin, "userLogin")){
-                        tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+            if(strcmp(quit, "q") == 0){
+                char character;
+                int length = 0;
+                User admin;
+                strcpy(admin.username, "AD-ADMIN");
+                printf("Donner votre mot de passe : ");
+                while(getchar() != '\n');
+                struct termios old_term, new_term;
+                tcgetattr(STDIN_FILENO, &old_term);
+                new_term = old_term;
+                new_term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON);
+                tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
+                while (1) {
+                    char character = getchar();
+                    if (character == '\n') {
+                        admin.password[length] = '\0';
                         break;
-                    } else{
-                        printf("Mot de passe incorrect\n");
-                        usleep(100000);
-                        system("clear");
+                    } else {
+                        admin.password[length++] = character;
+                        printf("*");
                     }
-                    
-                
-            }else {
-                sscanf(&quit, "%d", &id);
+                }
+                tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+                if(isauthenticate(admin, "userLogin.txt")){
+                    tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
+                    system("clear");
+                    int choice = adminMenu();
+                    manageAdmin(choice);
+                } else{
+                    printf("Mot de passe incorrect\n");
+                    usleep(200000);
+                    system("clear");
+                }
+            } else {
+                sscanf(quit, "%d", &id);
                 succes = verifyID(id, "ODC.txt");
 
                 if (succes) {
                     rewind(fileODC);
                     char line[MAXLENGTH];
                     while (fgets(line, sizeof(line), fileODC) != NULL) {
-                        
                         int tempID;
-                        char matricule[MAXLENGTH], lastname[MAXLENGTH], firstname[MAXLENGTH];
-                        sscanf(line, "%d %s %s %s", &tempID, matricule, lastname, firstname);
+                        char matricule[MAXLENGTH], lastname[MAXLENGTH], firstname[MAXLENGTH], classe[MAXLENGTH];
+                        sscanf(line, "%d %s %s %s %s", &tempID, matricule, lastname, firstname, classe);
 
                         if (tempID == id) {
                             if(isAlreadyPresent(tempID, todaysPresence)){
-                                printf("Vous vous etes deja enregistre.e\n");
+                                printf("Vous vous êtes déjà enregistré.e\n");
+                                usleep(200000);
+                                system("clear");
                                 break;
                             }
-                            else{
-                            time_t rawtime;
-                            struct tm * timeinfo;
-                            char timeString[MAXLENGTH];
-
-                             time(&rawtime);
-                             timeinfo = localtime(&rawtime);
-
-                            strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
-                            
-                            fprintf(presenceList, "%d %s %s %s present a %s\n", tempID, matricule, lastname, firstname, timeString);
-                            printf("Presence enregistree pour %s %s a %s\n", lastname, firstname, timeString);
-
-                            usleep(1000000);
-                            system("clear");
-
-                            fflush(presenceList);
-                            break;
+                            else {
+                                time_t rawtime;
+                                struct tm * timeinfo;
+                                char timeString[MAXLENGTH];
+                                time(&rawtime);
+                                timeinfo = localtime(&rawtime);
+                                strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+                                fprintf(presenceList, "\n%d\t %s\t %s\t %s\t present le %s\t a %s\n", tempID, matricule, lastname, firstname, formattedDate, timeString);
+                                printf("Présence enregistrée pour %s %s à %s\n", lastname, firstname, timeString);
+                                usleep(1000000);
+                                system("clear");
+                                fflush(presenceList);
+                                break;
                             }
                         }
                     }
@@ -456,4 +585,230 @@ void markPresence(void){
         }while(1);
         fclose(fileODC); fclose(presenceList);
     }
+}
+
+
+
+void markPresenceforStudent(int id){
+    
+    time_t date;
+    struct tm *localTime;
+    char formattedDate[MAXLENGTH];
+    date = time(NULL);
+    localTime = localtime(&date);
+    strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
+
+    char todaysPresence[MAXLENGTH] = "Presence-";
+    strcat(todaysPresence, formattedDate);
+    strcat(todaysPresence, ".txt");
+
+    FILE *fileODC = fopen("ODC.txt", "r");
+    FILE *presenceList = fopen(todaysPresence, "a");
+    if(fileODC == NULL || presenceList == NULL){
+        fprintf(stderr, "Impossible d'ouvrir les fichiers\n");
+        exit(EXIT_FAILURE);
+    }
+
+    else{
+        char line[CHARACTERBYLINE], row[20];
+        int succes;
+        char quit;
+        
+        succes = verifyID(id, "ODC.txt");
+
+        if (succes){
+            rewind(fileODC);
+            char line[MAXLENGTH];
+            while (fgets(line, sizeof(line), fileODC) != NULL){
+                        
+                int tempID;
+                char matricule[MAXLENGTH], lastname[MAXLENGTH], firstname[MAXLENGTH];
+                sscanf(line, "%d %s %s %s", &tempID, matricule, lastname, firstname);
+
+                if (tempID == id){
+                    if(isAlreadyPresent(tempID, todaysPresence)){
+                        printf("Vous vous etes deja enregistre.e\n");
+                        usleep(300000);
+                        system("clear");
+                        // studentMenu();
+                        break;
+                    }
+
+                    else{
+                        time_t rawtime;
+                        struct tm * timeinfo;
+                        char timeString[MAXLENGTH];
+
+                        time(&rawtime);
+                        timeinfo = localtime(&rawtime);
+
+                        strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+                                
+                        fprintf(presenceList, "\n%d\t %s\t %s\t %s\t present le %s\t a %s\n", tempID, matricule, lastname, firstname, formattedDate, timeString);
+                        printf("Presence enregistree pour %s %s a %s\n", lastname, firstname, timeString);
+
+                        usleep(1000000);
+                        system("clear");
+
+                        fflush(presenceList);
+                        studentMenu();
+                    }
+                }
+            }
+        }fclose(fileODC); fclose(presenceList);
+    }
+}
+
+
+
+
+void writeToFile(FILE *fileInput, FILE *fileOutput){
+
+    if(fileInput == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        char line[CHARACTERBYLINE];
+        while(fgets(line, sizeof(line), fileInput) != NULL) {
+            fprintf(fileOutput, "%s", line);
+        }
+    }
+}
+
+
+void generateAllPresenceList(char reference[]){
+    FILE *fileToWrite = fopen("Liste_de_tous_les_presence.txt", "w");
+
+    if(fileToWrite == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        DIR *directory = opendir(".");
+        if(directory == NULL){
+            fprintf(stderr, "Impossible d'ouvrir le repertoire\n");
+            exit(EXIT_FAILURE);
+        } else{
+            struct dirent *input;
+            while((input = readdir(directory)) != NULL){
+                if(strncmp(input->d_name, reference, strlen(reference)) == 0){
+                    FILE *fileToRead = fopen(input->d_name, "r");
+                    if(fileToRead != NULL){
+                        writeToFile(fileToRead, fileToWrite);
+                        fclose(fileToRead);
+                    } else {
+                        fprintf(stderr, "Impossible d'ouvrir le fichier %s\n", input->d_name);
+                    }
+                }
+            }
+            closedir(directory);
+        }
+        fclose(fileToWrite);
+    }
+}
+
+Message writeMessage(void){
+    Message message;
+    printf("Donner le matricule de l'etudiant: ");
+    scanf("%s", message.receiver);
+    getchar();
+    printf("Ecriver vcotre message : ");
+    fgets(message.content, sizeof(message.content), stdin);
+return message;
+}
+
+Message writeMessageToAll(void){
+    Message message;
+    // getchar();
+    printf("Ecriver vcotre message : ");
+    fgets(message.content, sizeof(message.content), stdin);
+    message.content[strcspn(message.content, "\n")] = '\0';
+return message;
+}
+
+int sendMessage(Message message, char sender[]){
+    char receiver[MAXLENGTH];
+    strcpy(receiver, message.receiver);
+    strcat(receiver, ".txt");
+    strcpy(message.sender, sender);
+
+    time_t date;
+    struct tm *localTime;
+    char formattedDate[MAXLENGTH];
+    date = time(NULL);
+    localTime = localtime(&date);
+    strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
+
+    time_t rawtime;
+    struct tm * timeinfo;
+    char timeString[MAXLENGTH];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+    FILE *fileReceiver = fopen(receiver, "w");
+
+    if(fileReceiver == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        fprintf(fileReceiver, "Message de : %s\n\nDate : le %s a %s\n\nContenue : %s", message.sender, formattedDate, timeString, message.content);
+        return 1;
+    } fclose(fileReceiver);
+return 0;
+}
+
+int sendMessageToAll(Message message, char sender[]){
+    strcpy(message.sender, sender);
+
+    time_t date;
+    struct tm *localTime;
+    char formattedDate[MAXLENGTH];
+    date = time(NULL);
+    localTime = localtime(&date);
+    strftime(formattedDate, sizeof(formattedDate), "%d-%m-%Y", localTime);
+
+    time_t rawtime;
+    struct tm * timeinfo;
+    char timeString[MAXLENGTH];
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(timeString, sizeof(timeString), "%H:%M:%S", timeinfo);
+    FILE *fileReceiver = fopen("messageToAll.txt", "w");
+
+    if(fileReceiver == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        fprintf(fileReceiver, "Message de : %s\n\nDate : le %s a %s\n\nContenue : %s", message.sender, formattedDate, timeString, message.content);
+        return 1;
+    } fclose(fileReceiver);
+return 0;
+}
+
+void readMessage(char fileMessage[]){
+    FILE *fileToRead = fopen(fileMessage, "r");
+    char line[CHARACTERBYLINE], character;
+    if(fileToRead == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        while(!feof(fileToRead)){
+            fgets(line, sizeof(line), fileToRead);
+            printf("%s", line);
+        }
+    } fclose(fileToRead);
+}
+
+int countMessageNumber(char fileMessage[]){
+    int count;
+    FILE *fileToRead = fopen(fileMessage, "r");
+    char line[CHARACTERBYLINE];
+    if(fileToRead == NULL){
+        fprintf(stderr, "Impossible d'ouvrir le fichier\n");
+        exit(EXIT_FAILURE);
+    } else{
+        while(fgets(line, sizeof(line), fileToRead) != NULL){
+            count++;
+        }
+    } fclose(fileToRead);
+return count;
 }

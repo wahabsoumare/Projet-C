@@ -1,0 +1,28 @@
+		===Liste de presence du 12-03-2024===
+
+
+3	 ST-SIFA	 Fall	 Sidi	 present le 12-03-2024	 a 12:15:49
+
+4	 ST-RAFA	 Fall	 Rama	 present le 12-03-2024	 a 12:15:58
+
+5	 ST-ANND	 Ndiaye	 Ansu	 present le 12-03-2024	 a 12:16:00
+
+1	 ST-TODI	 Diop	 Toto	 present le 12-03-2024	 a 12:16:02
+
+12	 ST-MBMA	 Mane	 Mbathi	 present le 12-03-2024	 a 12:16:04
+
+22	 ST-DAKE	 Kebe	 Dabakh	 present le 12-03-2024	 a 12:16:06
+
+27	 ST-SOUY	 Souane	 Soul	 present le 12-03-2024	 a 12:16:10
+
+7	 ST-TOSI	 Simon	 Tonton	 present le 12-03-2024	 a 12:16:19
+
+8	 ST-NIND	 Ndiaye	 Niok	 present le 12-03-2024	 a 12:16:21
+
+20	 ST-DIAK	 Kane	 Diakha	 present le 12-03-2024	 a 12:16:35
+
+23	 ST-MAMO	 Mbow	 Mamoud	 present le 12-03-2024	 a 12:16:41
+
+9	 ST-MBND	 Ndiaye	 Mbou	 present le 12-03-2024	 a 12:16:54
+
+11	 ST-NGBE	 Beye	 Ngoné	 present le 12-03-2024	 a 12:17:00

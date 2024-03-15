@@ -1,6 +1,7 @@
 #ifndef FONCTION_H
 #define FONCTION_H
 #define MAXLENGTH 30
+#define MESSAGECONTENT 5000
 //int autoClasseID = 0;
 
 typedef struct{
@@ -9,6 +10,7 @@ typedef struct{
 
 typedef struct{
     char username[MAXLENGTH], password[MAXLENGTH];
+    int id;
 }User;
 
 typedef struct{
@@ -31,6 +33,16 @@ typedef struct{
     Classe classe;
 }Student;
 
+typedef struct{
+    char sender[MAXLENGTH], receiver[MAXLENGTH];
+    char content[MESSAGECONTENT];
+}Message;
+
+Date inputDate(char*);
+int isLeapyear(Date);
+int isvalidDayinMonth(Date);
+int isvalideDate(Date);
+
 int adminMenu(void);
 
 int isauthenticate(User, char*);
@@ -40,6 +52,19 @@ void inputStudent(Student*);
 int saveStudent(Student, char*);
 void listClasse(char*);
 void markPresence(void);
+void markPresenceforStudent(int);
 int verifyID(int, char*);
 void hidePassword(char*, char*);
+void homeMenu();
+void manageAdmin();
+void manageStudent(int);
+int getStudentID(char*, char*);
+void writeToFile(FILE*, FILE*);
+void generateAllPresenceList(char*);
+Message writeMessage(void);
+Message writeMessageToAll(void);
+int sendMessage(Message, char*);
+int sendMessageToAll(Message, char*);
+void readMessage(char fileMessage[]);
+int countMessageNumber(char*);
 #endif
